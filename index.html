@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html  ng-app="ionic">
+<head lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no,width=device-width,height=device-height">
+<meta name="format-detection" content="telephone=no">
+<title></title>
+<script src="../Public/lib/ionic/js/ionic.bundle.min.js"></script>
+<script type="text/javascript" src="../Public/js/jquery-1.11.3.min.js"></script>
+<script type="text/javascript" src="../Public/js/jquery.mobile.custom.min.js"></script>
+<script src="../Public/js/cordova.js"></script>
+<link rel="stylesheet" href="../Public/lib/ionic/css/ionic.min.css">
+<link rel="stylesheet" href="../Public/css/style.css">
+<script>
+  window.onload=init;
+  var setting={
+    count:0,
+    total:32,
+    delay:300,
+    picIndex:[0,1,2,4,7,6,5,3]
+  }
+  function init(){
+  	var cWidth=$(window).width();
+  	var cHeight=$(window).height();
+  	var boxWid = $("#box").width();
+  	$('.wrap').css({'width':cWidth,'height':cHeight});
+  	$("#box").css('height',boxWid*0.825);
+  	$(".content").css('height',$(this).width());
+  	$(".loadingnow").css("display","none");
+  	//获取剩余抽奖次数
+  	function getUserInfo(){
+  		navigator.myPlugin.getUserInfoFunc()
+  	}
+  	function getChance(){
+  		navigator.myPlugin.doNetworkActionWithoutLoadingFunc(
+					[{"application":"QueryUserLotCount.Req","cumtomerId":"APP"}],
+					getluckresultSuccess, getluckresultError);
+  	}
+  	//抽奖函数
+  	function getluckresultError(error) {
+		alert(1);
+	}
+	function getluckresultSuccess(entry) {
+		alert(2);
+	}
+  	function getDraw(){
+		
+  		var chance=$('#chance').html();
+  		getChance();
+  		if(chance>0){
+	  		setting.count=0;
+	  		setting.total=32;
+	  		setting.delay=300;
+	  		$(this).off("tap");//禁用按钮
+	      //获得一个随机整数，代表中奖的那个位置
+	      setting.total+=Math.floor(Math.random()*8);
+	      //请求抽奖接口
+	      
+	      
+	      var change=function(){
+	      	$(".pic").removeClass('active');//改变样式
+	      	$(".pic").eq(setting.picIndex[setting.count%8]).addClass("active");//添加样式
+	      	setting.count++;
+	      	//初始加速，中间匀速，结束减速
+	      	if(setting.count<10){
+	      		setting.delay-=20;
+	      	}else if(setting.count>=(setting.total-10)){
+	      		setting.delay+=20
+	      	}else {
+	      		setting.delay=100;
+	      	}
+	      	//抽奖结束
+	      	if(setting.count<=setting.total){
+	      		var time=setTimeout(change,setting.delay)
+	      	} else{
+	      		clearTimeout(time);
+	      		if( setting.total==37 ){//未中奖
+	      			setTimeout(function(){
+	      				$('.shade').css('display',"block");
+	      				$('.no').css('display',"block");
+	      			},1000);
+	      			
+	      		}else{//中奖
+	      			setTimeout(function(){
+	      				$('.shade').css('display',"block");
+	//    			$('.shade').animate({'opacity','0.8'},500)
+	      			$('.yes').css('display',"block");
+	      			},1000);
+	      			
+	      		}
+	      	}
+	      }
+	  		setTimeout(change,setting.delay)
+  		}else{
+  			$('.shade').css('display',"block");
+     		$('.chance').css('display',"block");
+      		$(".pic").removeClass('active');
+  		}
+  		
+  	}
+  	
+  	//隐藏弹框函数
+  	function hideConfirm(event){
+		$('.shade').css('display',"none");
+      	$(event).css('display',"none");
+      	$(".pic").removeClass('active');
+      	$("#drawBtn").on("tap",getDraw);
+  	}
+  	$("#drawBtn").on("tap",getDraw);//绑定抽奖
+  	
+  	$('.yes-btn').on("tap",function(){
+  		hideConfirm(".yes");
+  	});
+  	$('.no-btn').on("tap",function(){
+  		hideConfirm(".no");
+  	});
+  	$('.chance-btn').on("tap",function(){
+  		hideConfirm(".chance");
+  	});
+  }
+</script>
+<style>
+*{
+	margin: 0;
+	padding: 0;
+}
+.wrap{
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background:url(image/bg.png)  no-repeat;
+	background-size: cover;
+	background-position-y: top;
+}
+.head_bg{
+	width: 84%;
+	height:auto;
+	display: block;
+	margin: 1% auto 0;
+}
+
+
+.content{
+	width: 100%;
+	background: url(image/bg1.png) no-repeat;
+	background-size: 98%;
+	background-position:top center;
+	margin: 0 auto;
+}
+.content p{
+	width: 80%;
+	height: 4rem;
+	margin: 0;
+	padding-left: 4rem;
+	background: url(image/gift.png) no-repeat;
+	background-size:12%;
+	background-position-x:2.28rem ;
+	font-size: 1.5rem;
+	color: #000;
+	line-height: 5rem;
+	text-indent: 3rem;
+}
+.content p span{
+	color: #f6fe01;
+	font-size: 1.8rem;
+}
+#box{
+	width: 80%;
+	padding: 5%;
+	margin: 0 auto;
+	background: url(image/bg2.png) no-repeat;
+	background-size: 98%;
+	background-position: center;
+	box-sizing: content-box;!important
+	
+}
+.pic1{
+	width: 32.2%;
+	height: 32%;
+	float: left;
+	background-repeat: no-repeat;
+	background-size:100%;
+	text-align: center;
+	margin:0  0 .8% 1%;
+	box-sizing: content-box;!important
+}
+#box .active{ 
+	box-sizing: border-box;
+	border: 2px solid #ffcb00;
+	border-radius: 10px;
+}
+.drawBtn{
+	width: 100%;
+	height: 100%;
+}
+.shade{
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000;
+	opacity: 0.5;
+	display: none;
+}
+.confirm{
+	width:80%;
+	height:50%;
+	margin: 0 auto;
+	font-size: 2rem;
+	background-color: #fff;
+	text-align:center;
+	position: fixed;
+	top: 10rem;
+	left: 0;
+	right: 0;
+	overflow: hidden;
+	-webkit-border-radius: 1rem;
+	display: none;
+}
+.confirm p{
+	position: absolute;
+	left: 0;
+	top: 0;
+	padding-top: 25%;
+	font-size: 1rem;
+	line-height: 2.5rem;
+	width: 100%;
+	height: 55%;
+	margin: 0 auto;
+	background-image: url(image/confirm_bg.png);
+	background-size: ;
+	background-position:50% 40%;
+	box-sizing: content-box;!important
+}
+
+.confirm>span{ 
+	position: absolute;
+	bottom: 5%;
+	left: 0;
+	right: 0;
+	width: 30%;
+	height: 10%;
+	line-height: 200%;
+	font-size: 1rem;
+	color: #fff;
+	margin: 0 auto;
+	background-color:#11C1F3;
+	border-radius: 5px;
+	text-align: center;
+}
+
+.chance p{
+	line-height: 3rem;
+}
+
+.list{
+	width: 8rem;
+	margin: 1rem auto;
+}
+.list a{
+	font-size: 1rem;
+}
+
+@media (device-height:480px) and (-webkit-min-device-pixel-ratio:2){/* 兼容iphone4/4s */
+	.head_bg{
+		width: 75%;
+		height:15%;
+		display: block;
+		margin: 1% auto 0;
+	}
+	.confirm p{
+
+		padding-top: 15%;
+		line-height: 2.5rem;
+		height: 55%;
+	}
+
+	.confirm>span{ 
+		bottom: 10%;
+		height: 10%;
+		line-height: 150%;
+	}
+}
+</style>
+</head>
+<body>
+<section class="loadingnow">
+    <div class="backdrop visible backdrop-loading active"></div>
+    <div class="loading-container visible active">
+        <div class="loading">
+            <span><ion-spinner icon="ios"></ion-spinner></span>
+        </div>
+    </div>
+</section>
+<section class="wrap">
+	<img class="head_bg" src="image/bg_picture@2x.png"/>
+	<div class="content">
+		<p>抽奖次数：<span id="chance">0</span> <span>次</span></p>
+		<div id="box">
+		  <div class="pic pic1" style="background-image: url(image/¥888@2x.png);"></div>
+		  <div class="pic pic1" style="background-image: url(image/¥888@2x.png);"></div>
+		  <div class="pic pic1" style="background-image: url(image/¥666@2x.png);"></div>
+		  <div class="pic pic1" style="background-image: url(image/¥1@2x.png);"></div>
+		  <div class="anniu pic1" id="drawBtn" style="background-image: url(image/drawBtn.png);" ></div>
+		  <div class="pic pic1" style="background-image: url(image/¥16@2x.png);"></div>
+		  <div class="pic pic1" style="background-image: url(image/¥6@2x.png);"></div>
+		  <div class="pic pic1" style="background-image: url(image/thanks.png);"></div>
+		  <div class="pic pic1" style="background-image: url(image/¥1@2x.png);"></div>
+		</div>
+	</div>
+	<p class="list"><a href="drawList.html">查看中奖名单&nbsp;></a></p>
+</section>
+<div class="shade">
+
+</div>
+<div class="chance confirm">
+  	<p>亲、您的抽奖次数已用完！<br/>感谢您的参与！</p>
+ 	<span class="chance-btn">确认</span>
+</div>
+<div class="yes confirm">
+  	<p >恭喜您已抽中<span>666</span>元大奖、奖金将于<br/>本月20日前抵达您的瑞钱包余额<br/>中，感谢您的参与！</p>
+  	<span class="yes-btn">确认</span>
+</div>
+<div class="no confirm">
+	<p>谢谢您的参与，下次再接再厉！<br/>瑞钱包祝您万事如意！</p>
+  	<span class="no-btn">确认</span>
+</div>
+</body>
+</html>
